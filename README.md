@@ -1,7 +1,7 @@
 # Reddit2Ebook
-Turns any subreddit (selftext) to ebook format.
+Turn any subreddit (selftext only) to an ebook.
 
-App currently loads post starting from newest available.
+App currently loads post starting from newest post available.
 
 It also ignores sticky messages and non-selfpost messages.
 
