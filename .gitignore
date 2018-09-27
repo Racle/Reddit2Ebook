@@ -1,0 +1,6 @@
+.idea
+.git
+.env
+node_modules
+output
+cover/cover.jpg
