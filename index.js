@@ -85,18 +85,18 @@ async function createCover() {
     // load font and our base cover image
     // we put subreddit into this image
     const font = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
-    const image = await Jimp.read("./cover/reddit2ebook.jpg");
+    const image = await Jimp.read("./cover/Reddit2Ebook.jpg");
 
     await image.print(
         font,
         0, // x
-        850, // y
+        600, // y
         {
             text: subreddit,
             alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
             alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE
         },
-        783, // maxWidth (use same width as base cover image to center correctly)
+        782, // maxWidth (use same width as base cover image to center correctly)
         200  // maxHeight
     ).write("./cover/cover.jpg");
 
