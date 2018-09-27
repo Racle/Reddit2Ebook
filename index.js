@@ -42,7 +42,7 @@ async function generateEbook() {
     //creating custom cover with subreddit as text
     await createCover();
     epub = makepub.document(metadata, "./cover/cover.jpg");
-    epub.addCSS("h1>a{color:inherit}");
+    epub.addCSS("h1>a{color:inherit;text-decoration:none}");
     await getContent("https://old.reddit.com/" + subreddit + '/new.json?limit=10&sort=new');
 
     epub.writeEPUB(function (e) {
