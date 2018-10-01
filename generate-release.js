@@ -1,5 +1,5 @@
 const fs = require('fs');
-var pjson = require('./package.json');
+const pjson = require('./package.json');
 const archiver = require('archiver');
 
 // create releases folder if not exist
