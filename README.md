@@ -10,14 +10,16 @@ It also ignores sticky messages and non-selfpost messages.
 - unzip .zip folder
 - modify config.txt
 - run executable 
-    - Linux 
-        - use terminal to run
+    - Linux / Mac
+        - use terminal
         - run `chmod +x reddit2ebook-linux`
         - run `./reddit2ebook-linux`
     - Windows
-        - run `reddit2ebook-win.exe`
+        - double-click `reddit2ebook-win.exe` 
     - Mac
-        - Not tested
+        - use terminal
+        - run `chmod +x reddit2ebook-macos`
+        - run `./reddit2ebook-macos`
 - created ebook is found at `./output/<subredditname>.epub`
 
 
@@ -34,7 +36,7 @@ It also ignores sticky messages and non-selfpost messages.
 - run with `npm run start` **OR** `node index.js`
 - created ebook is found at `./output/<subredditname>.epub`
 
-NOTE: Windows users might need to run `npm i` in cmd with administrator privaledges for node-gyp install to success
+NOTE: Windows users might need to run `npm i --production` in cmd with administrator privaledges for node-gyp install to success
 
 ### Building executable
 
