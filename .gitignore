@@ -1,6 +1,11 @@
 .idea
 .git
 .env
+config.txt
 node_modules
 output
 cover/cover.jpg
+reddit2ebook-linux
+reddit2ebook-win.exe
+reddit2ebook-macos
+releases

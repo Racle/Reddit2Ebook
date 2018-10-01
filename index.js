@@ -1,12 +1,20 @@
-const dotenv = require('dotenv').config();
 const axios = require('axios');
 const makepub = require("nodepub");
 const decode = require('unescape');
 const Jimp = require("jimp");
+const fs = require('fs');
+const readline = require('readline');
+
+const path = fs.existsSync('./config.txt') ? 'config.txt' : '.env';
+
+//requiring dotenv with .env file OR config.txt file
+const dotenv = require('dotenv').config({path: path});
 
 if (dotenv.error) {
-    return console.log("Missing .env file");
+    console.log("Missing .env OR config.txt file");
+    process.exit()
 }
+
 let epub;
 let maxPages = process.env.max_pages - 1;
 let currentPage = 0;
@@ -39,17 +47,31 @@ generateEbook();
 
 
 async function generateEbook() {
+    console.log("Creating ebook from: " +  subreddit);
     //creating custom cover with subreddit as text
     await createCover();
     epub = makepub.document(metadata, "./cover/cover.jpg");
     epub.addCSS("h1>a{color:inherit;text-decoration:none}");
     await getContent("https://old.reddit.com/" + subreddit + '/new.json?limit=10&sort=new');
 
-    epub.writeEPUB(function (e) {
+    await epub.writeEPUB(function (e) {
         console.log("Error:", e);
-    }, './output', subreddit.split("/").pop(), function () {
-        console.log("EPUB created.")
+    }, './output', subreddit.split("/").pop(), async function () {
+        console.log("EPUB created to output/" + subreddit.split("/").pop() + ".epub\n");
+
+      // add "Press enter to continue..." after writing epub
+      // this is for executables, so you can see what app created
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+      await rl.question('Press enter to continue...', () => {
+        rl.close();
+      });
+
     });
+
+
 
 }
 
@@ -68,7 +90,7 @@ async function getContent(url) {
                     decode(c.data.selftext_html).replace("<!-- SC_ON -->", ""));
             })
 
-            console.log("Current page: " +  (currentPage+1));
+            console.log("Current page: " +  (currentPage+1) + "/" + (maxPages+1));
 
             // if there is more pages (data.after) and we are not over maxPages limit, get more pages
             if(r.data.data.after && ++currentPage <= maxPages) {
@@ -98,6 +120,8 @@ async function createCover() {
         },
         782, // maxWidth (use same width as base cover image to center correctly)
         200  // maxHeight
-    ).write("./cover/cover.jpg");
+    )
+      .quality(80) // set JPEG quality. We don't need very high quality output.
+      .write("./cover/cover.jpg");
 
 }
