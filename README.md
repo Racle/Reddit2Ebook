@@ -36,7 +36,7 @@ It also ignores sticky messages and non-selfpost messages.
 - run with `npm run start` **OR** `node index.js`
 - created ebook is found at `./output/<subredditname>.epub`
 
-NOTE: Windows users might need to run `npm i --production` in cmd with administrator privaledges for node-gyp install to success
+NOTE: Windows users might need to run `npm i --production` in cmd with administrator privileges for node-gyp install to success
 
 ### Building executable
 
