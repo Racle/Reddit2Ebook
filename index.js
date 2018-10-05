@@ -1,4 +1,4 @@
-const axios = require('axios');
+const axiosClass = require('axios');
 const makepub = require("nodepub");
 const decode = require('unescape');
 const Jimp = require("jimp");
@@ -39,6 +39,9 @@ const metadata = {
     images: []
 };
 
+//one request per second
+const axios = axiosClass.create();
+scheduleRequests(axios, 1000);
 // ##START
 
 // checking if configuration is valid and setting default values
@@ -59,6 +62,7 @@ process.env.comments_max_replies_indentation = process.env.comments_max_replies_
 
 // just to get this as async function
 generateEbook();
+
 
 
 
@@ -224,4 +228,28 @@ async function asyncForEach(array, callback) {
     for (let index = 0; index < array.length; index++) {
         await callback(array[index], index, array)
     }
+}
+
+function scheduleRequests(axiosInstance, intervalMs) {
+  let lastInvocationTime = undefined;
+
+  const scheduler = (config) => {
+    //console.log("loading " + config.url);
+    const now = Date.now();
+    if (lastInvocationTime) {
+      lastInvocationTime += intervalMs;
+      const waitPeriodForThisRequest = lastInvocationTime - now;
+      if (waitPeriodForThisRequest > 0) {
+        return new Promise((resolve) => {
+          setTimeout(
+            () => resolve(config),
+            waitPeriodForThisRequest);
+        });
+      }
+    }
+    lastInvocationTime = now;
+    return config;
+  }
+
+  axiosInstance.interceptors.request.use(scheduler);
 }

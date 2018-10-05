@@ -8,6 +8,7 @@
     "dotenv": "^6.0.0",
     "jimp": "^0.5.3",
     "nodepub": "^2.0.7",
+    "ora": "^3.0.0",
     "unescape": "^1.0.1"
   },
   "devDependencies": {
