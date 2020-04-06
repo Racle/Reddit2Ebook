@@ -6,7 +6,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "dotenv": "^6.0.0",
-    "jimp": "^0.5.3",
+    "jimp": "^0.10.1",
     "nodepub": "^2.0.7",
     "ora": "^3.0.0",
     "unescape": "^1.0.1"

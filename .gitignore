@@ -1,4 +1,5 @@
 .idea
+.history
 .git
 .env
 config.txt
