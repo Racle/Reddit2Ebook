@@ -2,6 +2,14 @@
 subreddit=r/talesfromtechsupport
 max_pages=10
 
+# Page. Values: new|top|hot|rising|controversial
+# Default value is new
+page=new
+
+# Optional with page. Values: all|hour|day|month|year
+# Default value is all
+from=all
+
 # Comments (optional). Also extremely slow. disabled by default.
 comments_include=false
 comments_min_points=2
