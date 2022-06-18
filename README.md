@@ -59,8 +59,11 @@ NOTE: Windows users might need to run `npm i --production` in cmd with administr
 ## .env / config.txt
 
 ```
+# Base configuration. Subreddit OR wikipage is required.
 # Base configuration. Subreddit is required.
 subreddit=r/talesfromtechsupport    # Subreddit with r/
+wikipage=https://www.reddit.com/r/hfy/wiki/series/calamitys_shadow  # wikipage link
+wikipage_title=Calamity's Shadow                                    # wikipage title (same as ebook title)
 max_pages=10                        # Maxium pages to loop trough
 
 # Page. Values: new|top|hot|rising|controversial
@@ -85,6 +88,9 @@ kindle_from_email=user@mail.com     # Your whitelisted email (NOT YET AVAILABLE)
 
 NOTE: config.txt is prioritized over .env
 
+`wikipage` also requires `wikipage_title`
+if `wikipage` is set, `max_pages`, `page` and `from` is ignored.
+
 After adding comments support, configuration gets little complicated.
 
 Here is little explanation.
@@ -107,6 +113,15 @@ So in default configuration, if message thread have 4 indented replies, we only 
   - if comments go over certain limit, there is change that all is not fetched.
 
 # Changelog
+
+### Release 1.3.0
+
+```
+2022-06-18 - Wikipage support
+
+- added support for wikipages, ex. https://www.reddit.com/r/hfy/wiki/series/calamitys_shadow
+Reddit2Ebook automatically lists all post links and download those posts
+```
 
 ### Release 1.2.0
 

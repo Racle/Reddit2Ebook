@@ -1,5 +1,8 @@
-# Base configuration. Subreddit is required.
+# Base configuration. Subreddit OR wikipage is required.
 subreddit=r/talesfromtechsupport
+# wikipage=https://www.reddit.com/r/hfy/wiki/series/calamitys_shadow
+# wikipage_title=Calamity's Shadow
+
 max_pages=10
 
 # Page. Values: new|top|hot|rising|controversial

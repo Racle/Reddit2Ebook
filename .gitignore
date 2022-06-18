@@ -1,4 +1,5 @@
 .idea
+.vim
 .history
 .git
 .env

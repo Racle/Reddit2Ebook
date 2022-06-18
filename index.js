@@ -13,13 +13,14 @@ const dotenv = require('dotenv').config({ path: path })
 let epub
 let maxPages = process.env.max_pages - 1
 let currentPage = 0
-const subreddit = process.env.subreddit
+let subreddit = process.env.subreddit
 const page = process.env.page || 'new'
 const from = process.env.from || 'all'
 let url = ''
 let urlExtra = ''
 let metadata = {}
 let comments_include = false
+let wikiLinks = []
 
 //one request per second
 const axios = axiosClass.create()
@@ -34,9 +35,40 @@ async function main() {
     process.exit()
   }
 
+  if (process.env.wikipage !== undefined) {
+    await axios
+      .get(process.env.wikipage + '.json')
+      .then(async r => {
+        if (r.data.kind !== 'wikipage') {
+          console.log('Invalid wikipage link')
+          await pause()
+          process.exit()
+        }
+        let regexp = /\((https.*\/comments\/.*)\)/g
+        let matches = r.data.data.content_md.matchAll(regexp)
+        for (const match of matches) {
+          wikiLinks.push(match[1])
+        }
+      })
+      .catch(async _ => {
+        console.log('Invalid wikipage link')
+        await pause()
+        process.exit()
+      })
+    if (wikiLinks.length === 0) {
+      console.log('No links found in wikipage')
+      await pause()
+      process.exit()
+    } else {
+      // set defaultvalues if wikiLinks is not empty
+      maxPages = wikiLinks.length - 1
+      subreddit = process.env.wikipage_title
+    }
+  }
+
   // checking if configuration is valid and setting default values
-  if (process.env.subreddit === undefined) {
-    console.log('Missing subreddit from config file')
+  if (process.env.subreddit === undefined && process.env.wikipage === undefined) {
+    console.log('Missing subreddit or wikipage from config file')
     await pause()
     process.exit()
   }
@@ -65,10 +97,11 @@ async function main() {
 
   url = '/' + page + '.json?limit=10&sort=' + page + urlExtra
 
+  let filename = wikiLinks.length > 0 ? subreddit.replace(/[^a-z0-9]/gi, '_').toLowerCase() : subreddit.split('/').pop()
   metadata = {
     id: Date.now(),
-    title: subreddit,
-    series: subreddit,
+    title: subreddit.replace(/[^a-z0-9]/gi, ' '),
+    series: subreddit.replace(/[^a-z0-9]/gi, ' '),
     sequence: 1,
     author: 'Anonymous',
     fileAs: 'Anonymous',
@@ -98,31 +131,41 @@ async function main() {
   process.env.comments_max_replies_indentation = process.env.comments_max_replies_indentation || 2
 
   // just to get this as async function
-  generateEbook()
+  generateEbook(wikiLinks.length > 0)
 }
 
 async function pause() {
   readlineSync.question('Press enter to continue...')
 }
 
-async function generateEbook() {
-  console.log('Creating ebook from: ' + subreddit + ' (' + page + ', links from ' + (['all', 'new'].includes(from) ? '' : 'past ') + from + ')' + (comments_include ? ' (comments enabled)' : ''))
+async function generateEbook(wikipage = false) {
+  if (wikipage) {
+    console.log('Generating wikipage ebook: ' + process.env.wikipage_title + (comments_include ? ' (comments enabled)' : ''))
+  } else {
+    console.log('Creating ebook from: ' + subreddit + ' (' + page + ', links from ' + (['all', 'new'].includes(from) ? '' : 'past ') + from + ')' + (comments_include ? ' (comments enabled)' : ''))
+  }
 
   //creating custom cover with subreddit as text
   await createCover()
   epub = makepub.document(metadata, './cover/cover.jpg')
   epub.addCSS('h1>a{color:inherit;text-decoration:none}.comment-parent{margin-left:0!important}.comment{margin-left:5px;padding-left:5px;border-left:1px solid gray;}')
 
-  await getContent('https://old.reddit.com/' + subreddit + url)
+  if (wikipage) {
+    await getWikipageContent()
+  } else {
+    await getContent('https://old.reddit.com/' + subreddit + url, wikipage)
+  }
+
+  let filename = wikiLinks.length > 0 ? subreddit.replace(/[^a-z0-9]/gi, '_').toLowerCase() : subreddit.split('/').pop()
 
   await epub.writeEPUB(
     function (e) {
       console.log('Error:', e)
     },
     './output',
-    subreddit.split('/').pop(),
+    filename,
     async function () {
-      ora('EPUB created to output/' + subreddit.split('/').pop() + '.epub\n')
+      ora('EPUB created to output/' + filename + '.epub\n')
         .start()
         .succeed()
 
@@ -140,32 +183,7 @@ async function getContent(url) {
       const spinner = ora('Current page: ' + (currentPage + 1) + '/' + (maxPages + 1)).start()
       spinner.start()
       await asyncForEach(r.data.data.children, async c => {
-        // we only want selfposts and non-sticky posts
-        if (!c.data.is_self || c.data.stickied) return
-        let comments = ''
-
-        // load comments if they are enabled
-        if (comments_include) {
-          comments = await getComments(c.data.url.slice(0, -1) + '.json?sort=confidence')
-          if (comments !== '') comments = '<br /><h3>Comments<hr /></h3>' + comments
-        }
-
-        //add section to epub. Title as h1 with link. small text for author and date.
-        epub.addSection(
-          c.data.title,
-          "<h1><a href='" +
-            c.data.url +
-            "'>" +
-            c.data.title +
-            '</a></h1>' +
-            '<small><i>By</i> ' +
-            c.data.author +
-            ' <i>on</i> ' +
-            new Date(c.data.created * 1000).toISOString().split('T')[0] +
-            '</small>' +
-            decode(c.data.selftext_html).replace('<!-- SC_ON -->', '') +
-            comments
-        )
+        await addPost(c)
       })
       spinner.succeed()
       process.stdout.write('\r')
@@ -178,6 +196,54 @@ async function getContent(url) {
     .catch(function (error) {
       console.log(error)
     })
+}
+
+async function getWikipageContent() {
+  await asyncForEach(wikiLinks, async link => {
+    await axios
+      .get(link + '.json')
+      .then(async r => {
+        const spinner = ora('Current page: ' + (currentPage + 1) + '/' + (maxPages + 1)).start()
+        spinner.start()
+        await addPost(r.data[0].data.children[0])
+        spinner.succeed()
+        process.stdout.write('\r')
+
+        currentPage++
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
+  })
+}
+
+async function addPost(c) {
+  // we only want selfposts and non-sticky posts
+  if (!c.data.is_self || c.data.stickied) return
+  let comments = ''
+
+  // load comments if they are enabled
+  if (comments_include) {
+    comments = await getComments(c.data.url.slice(0, -1) + '.json?sort=confidence')
+    if (comments !== '') comments = '<br /><h3>Comments<hr /></h3>' + comments
+  }
+
+  //add section to epub. Title as h1 with link. small text for author and date.
+  epub.addSection(
+    c.data.title,
+    "<h1><a href='" +
+      c.data.url +
+      "'>" +
+      c.data.title +
+      '</a></h1>' +
+      '<small><i>By</i> ' +
+      c.data.author +
+      ' <i>on</i> ' +
+      new Date(c.data.created * 1000).toISOString().split('T')[0] +
+      '</small>' +
+      decode(c.data.selftext_html).replace('<!-- SC_ON -->', '') +
+      comments
+  )
 }
 
 async function getComments(url) {
