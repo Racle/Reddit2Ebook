@@ -10,7 +10,7 @@ It also ignores sticky messages and non-selfpost messages.
 
 ### Usage
 
-- Get lastest release from [releases](https://github.com/Racle/Reddit2Ebook/releases).
+- get lastest release from [releases](https://github.com/Racle/Reddit2Ebook/releases).
 - unzip .zip folder
 - modify config.txt
 - run executable
@@ -24,7 +24,10 @@ It also ignores sticky messages and non-selfpost messages.
     - use terminal
     - run `chmod +x reddit2ebook-macos`
     - run `./reddit2ebook-macos`
-    - If you get a MacOS System worning, go to settings > Privacy & Security and then scroll down in the window and you should see a message about reddit2ebook. Once you click allow try running ./reddit2ebook-macos from the same directory again.
+      - if you get a MacOS System warning, go to `Settings > Privacy & Security` and then scroll down in the window and you should see a message about reddit2ebook. 
+       - click allow 
+       - try running `./reddit2ebook-macos` from the same directory again.
+
 - created ebook is found at `./output/<subredditname>.epub`
 
 ## Run and build
