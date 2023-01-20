@@ -14,7 +14,7 @@ It also ignores sticky messages and non-selfpost messages.
 - unzip .zip folder
 - modify config.txt
 - run executable
-  - Linux / Mac
+  - Linux
     - use terminal
     - run `chmod +x reddit2ebook-linux`
     - run `./reddit2ebook-linux`
@@ -24,6 +24,7 @@ It also ignores sticky messages and non-selfpost messages.
     - use terminal
     - run `chmod +x reddit2ebook-macos`
     - run `./reddit2ebook-macos`
+    - If you get a MacOS System worning, go to settings > Privacy & Security and then scroll down in the window and you should see a message about reddit2ebook. Once you click allow try running ./reddit2ebook-macos from the same directory again.
 - created ebook is found at `./output/<subredditname>.epub`
 
 ## Run and build
